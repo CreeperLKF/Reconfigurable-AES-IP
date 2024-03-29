@@ -99,37 +99,20 @@ function automatic integer unsigned xor_key (byte dep);
     else return xor_key(dep - 1) ^ key_split[dep];
 endfunction
 
-generate
-    if (KF_ROLL_LEVEL == 0) begin
-// `ifdef KF_ROLL_LEVEL_0
-        // The clock could be optimized
-        always_ff @( posedge clk1_in ) begin : ff_key_out
-            if (clk3_en) begin
-                for (byte i = 0; i <= AES_KEY_SPLIT; i++) begin
-                    key_split_out[i] <= rcon ^ xor_key(i) ^ s;
-                end
-            end
-        end
-// `endif
-// `ifdef KF_ROLL_LEVEL_1
-    end else if (KF_ROLL_LEVEL == 1) begin
-        // Optimization from DSP design
-        integer xor_tmp_01, xor_tmp_23;
-        integer xor_tmp;
-        always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp_01 <= key_split[0] ^ key_split[1];
-        always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp_23 <= key_split[2] ^ key_split[3];
-        always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp <= {24'b0, rcon} ^ s;
-        // always_ff @( posedge clk2_in ) xor_tmp <= rcon ^ s;
-        always_ff @( posedge clk2_in ) begin : ff_key_out // 3 xor in fastest clock
-            if (clk3_en & ~clk3_in) begin
-                key_split_out[0] <= xor_tmp ^ key_split[0];
-                key_split_out[1] <= xor_tmp ^ xor_tmp_01;
-                key_split_out[2] <= xor_tmp ^ xor_tmp_01 ^ key_split[2];
-                key_split_out[3] <= xor_tmp ^ xor_tmp_01 ^ xor_tmp_23;
-            end
-        end
-// `endif
+// Optimization from DSP design
+integer xor_tmp_01, xor_tmp_23;
+integer xor_tmp;
+always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp_01 <= key_split[0] ^ key_split[1];
+always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp_23 <= key_split[2] ^ key_split[3];
+always_ff @( posedge clk2_in ) if (clk3_en) xor_tmp <= {24'b0, rcon} ^ s;
+// always_ff @( posedge clk2_in ) xor_tmp <= rcon ^ s;
+always_ff @( posedge clk2_in ) begin : ff_key_out // 3 xor in fastest clock
+    if (clk3_en & ~clk3_in) begin
+        key_split_out[0] <= xor_tmp ^ key_split[0];
+        key_split_out[1] <= xor_tmp ^ xor_tmp_01;
+        key_split_out[2] <= xor_tmp ^ xor_tmp_01 ^ key_split[2];
+        key_split_out[3] <= xor_tmp ^ xor_tmp_01 ^ xor_tmp_23;
     end
-endgenerate
+end
 
 endmodule

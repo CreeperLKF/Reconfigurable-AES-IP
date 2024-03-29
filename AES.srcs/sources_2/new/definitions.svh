@@ -16,10 +16,6 @@
  * // 现在是全部流水线展开，后续会收缩面积
  * // 还没有优化时序
  * 现在做了一些优化，但是我懒得写AES_192和AES_256了。其实很好改的。
- * 由于多时钟和Block RAM的使用，无法简单地在ASIC上综合，所以最后只在FPGA上综合
- * FPGA上综合得到的结果是非常好的，有1.333ns的slack余量（如果固定端口则是0.864ns），而三个时钟最短周期是5ns
- * 功耗0.358W和一般ASIC综合结果相当，但是FPGA本身功耗高，所以设计期望是比较优秀的
-
 */
 
 `ifndef _DEFINITIONS_SVH
@@ -30,24 +26,15 @@
 `define KF_USE_TBOX // use TBox or calculate normally
 // `define KF_USE_PIPELINE // use full pipeline
 // `define KF_USE_EXTRA_CLK_EN // use extra clk enable to reduce power
-// `define KF_IC // compatible design for IC synthesis
-// `define KF_ROLL_LELVE_0
-// `define KF_ROLL_LEVEL_1
-parameter KF_ROLL_LEVEL = 1;
+`define KF_IC // compatible design for IC synthesis
 
 typedef enum byte unsigned { 
     AES_128 = 'd127,
     AES_192 = 'd191,
     AES_256 = 'd255
 } AES_ALL_TYPE;
-parameter AES_ALL_TYPE AES_TYPE = AES_128;
-parameter byte unsigned AES_KEY_LEN = AES_TYPE;
-parameter byte unsigned AES_TXT_LEN = 'd127;
-parameter byte unsigned AES_KEY_SPLIT = AES_KEY_LEN >> 'd5;
-parameter byte unsigned AES_TXT_ROUND = AES_KEY_SPLIT +'d6;
-parameter byte unsigned AES_KEY_ROUND = ((AES_TXT_ROUND + 1'b1) << 2) / (AES_KEY_SPLIT + 1'b1) - 1'b1;
 typedef logic [127:0] AES_TXT;
-typedef logic [AES_KEY_LEN:0] AES_KEY;
+typedef logic [127:0] AES_KEY;
 typedef byte AES_BOX [15:0];
 typedef byte AES_SOX [3:0];
 typedef integer AES_TOX [3:0];

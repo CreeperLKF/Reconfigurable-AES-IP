@@ -13,8 +13,8 @@ module AES_out(
     input [1:0] state_in, // [1]: if AES_in is ready, [0]: if AES_out should start
 
     output byte data_out, // output data
-    output logic ready_out, // if the AES is inputing data (the inverse of cmd_in[1])
-    output logic ok_out // if the data is ready (keep at output)
+    output wire ready_out, // if the AES is inputing data (the inverse of cmd_in[1])
+    output reg ok_out // if the data is ready (keep at output)
 );
 
 typedef enum logic { 
@@ -22,13 +22,8 @@ typedef enum logic {
     AO_OUTPUT
 } AES_out_STATE;
 
-byte data_out_1;
-reg ok_out_1;
-
 AES_out_STATE aes_out_state; // just as its name
-assign ready_out = state_in[1];
-assign ok_out = ok_out_1;
-assign data_out = data_out_1;
+assign ready_out = state_in[1]; // that's it. no delay.
 
 byte unsigned cur_byte; // the current byte for output
 
@@ -43,20 +38,16 @@ always_ff @( posedge clk_in or negedge rst_n ) begin : ff_aes_out_state
         aes_out_state <= aes_out_state;
 end
 
-// always_ff @( posedge clk_in ) data_out <= data_out_1;
-// always_ff @( posedge clk_in ) ready_out <= state_in[1];
-// always_ff @( posedge clk_in ) ok_out <= ok_out_1;
-
 always_ff @( posedge clk_in or negedge rst_n) begin : ff_out
     if (!rst_n) begin // reset for stability and security
-        data_out_1 <= '0;
-        ok_out_1 <= '0;
+        data_out <= '0;
+        ok_out <= '0;
     end else if (aes_out_state == AO_OUTPUT) begin
-        data_out_1 <= cipher_in[cur_byte];
-        ok_out_1 <= '1;
+        data_out <= cipher_in[cur_byte];
+        ok_out <= '1;
     end else begin
-        data_out_1 <= '0;
-        ok_out_1 <= '0;
+        data_out <= '0;
+        ok_out <= '0;
     end
 end
 

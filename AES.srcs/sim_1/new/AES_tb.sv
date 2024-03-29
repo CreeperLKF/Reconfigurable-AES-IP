@@ -19,8 +19,8 @@ reg [1:0] cmd;
 reg ready_out, ok_out;
 
 initial begin
-    plain_file = $fopen("/home/linearkf/Code/FPGA/Crypt/AES/AES.srcs/sim_1/new/plain0.txt", "r");
-    key_file = $fopen("/home/linearkf/Code/FPGA/Crypt/AES/AES.srcs/sim_1/new/key0.txt", "r");
+    plain_file = $fopen("/home/linearkf/Code/FPGA/Crypt/AES/AES.srcs/sim_1/new/plain.txt", "r");
+    key_file = $fopen("/home/linearkf/Code/FPGA/Crypt/AES/AES.srcs/sim_1/new/key.txt", "r");
     cmd = 2'd0;
     #1024
     cmd = 2'd3;
